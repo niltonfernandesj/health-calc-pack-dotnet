@@ -1,6 +1,7 @@
 ﻿using health_calc_pack_dotnet;
 using health_calc_pack_dotnet.Enums;
 using health_calc_pack_dotnet.Interfaces;
+using health_calc_pack_dotnet.MacronutrientsStrategy;
 using health_calc_pack_dotnet.Models;
 
 namespace test.health_calc_pack
@@ -8,37 +9,43 @@ namespace test.health_calc_pack
     public class MacronutrientsTest
     {
         [Theory]
-        [InlineData(PhysicalObjectiveEnum.MuscleGain)]
-        [InlineData(PhysicalObjectiveEnum.WeigthLoss)]
-        [InlineData(PhysicalObjectiveEnum.WeightMaintenance)]
-        public void CalculateMacronutrients_WhenDataIsValid_ThenReturnMacronutrients(PhysicalObjectiveEnum PhysicalObjective)
+        [InlineData(PhysicalObjectiveEnum.MuscleGain, 88.8, 355.2, 177.6, 88.8)]
+        [InlineData(PhysicalObjectiveEnum.WeigthLoss, 88.8, 266.4, 355.2, 266.4)]
+        [InlineData(PhysicalObjectiveEnum.WeightMaintenance, 88.8, 355.2, 355.2, 177.6)]
+        public void CalculateMacronutrients_WhenDataIsValid_ThenReturnMacronutrients(
+            PhysicalObjectiveEnum PhysicalObjective,
+            double Weight,
+            double Carbohydrates,
+            double Proteins,
+            double Fat
+        )
         {
             // Arrange
-            IMacronutrients macronutrients = new Macronutrients();
-            double Weight = 88.8;
-            MacronutrientsModel Expected = new MacronutrientsModel();
+            MacronutrientsContext macronutrientsStrategy = new();
 
-            if (PhysicalObjective == PhysicalObjectiveEnum.WeigthLoss)
+            switch (PhysicalObjective)
             {
-                Expected.Carbohydrates = 266.4;
-                Expected.Proteins = 355.2;
-                Expected.Fat = 266.4;
+                case PhysicalObjectiveEnum.MuscleGain:
+                    macronutrientsStrategy.SetStrategy(new MuscleGainStrategy());
+                    break;
+                case PhysicalObjectiveEnum.WeigthLoss:
+                    macronutrientsStrategy.SetStrategy(new WeightLossStrategy());
+                    break;
+                case PhysicalObjectiveEnum.WeightMaintenance:
+                    macronutrientsStrategy.SetStrategy(new WeightMaintenenceStrategy());
+                    break;
+                default:
+                    break;
             }
-            else if (PhysicalObjective == PhysicalObjectiveEnum.WeightMaintenance)
+            MacronutrientsModel Expected = new()
             {
-                Expected.Carbohydrates = 355.2;
-                Expected.Proteins = 355.2;
-                Expected.Fat = 177.6;
-            }
-            else if (PhysicalObjective == PhysicalObjectiveEnum.MuscleGain)
-            {
-                Expected.Carbohydrates = 355.2;
-                Expected.Proteins = 177.6;
-                Expected.Fat = 88.8;
-            }
+                Carbohydrates = Carbohydrates,
+                Proteins = Proteins,
+                Fat = Fat,
+            };
 
             // Act
-            var result = macronutrients.CalculateMacronutrients(PhysicalObjective, Weight);
+            var result = macronutrientsStrategy.ExecuteStrategy(Weight);
 
 
             // Asserts

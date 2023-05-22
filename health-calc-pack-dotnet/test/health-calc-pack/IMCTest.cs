@@ -1,7 +1,7 @@
 using health_calc_pack_dotnet;
 using health_calc_pack_dotnet.Interfaces;
 
-namespace test
+namespace test.health_calc_pack
 {
     public class IMCTest
     {
@@ -11,7 +11,7 @@ namespace test
             // Arrange
             IIMC imc = new IMC();
             double Height = 1.70;
-            double Weight = 88.3;
+            double Weight = 88.3; 
             double ExpectedIMC = 30.55;
 
             // Act
